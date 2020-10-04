@@ -1,0 +1,47 @@
+*{
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+
+
+li, ul {
+    list-style: none;
+}
+
+
+.login{
+    background-image:url(https://web.ccpgamescdn.com/eveonlineassets/developers/eve-sso-login-black-small.png);
+    width: 195px;
+    height: 30px;
+    
+}
+body{
+    background-color: #2F303A;
+    color:white;
+    font-family: Poppins, sans-serif;
+    height: 100vh;
+}
+
+.full-height-grow{
+    display: flex;
+    flex-direction: column;
+}
+.container{
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.main-header {
+    display: flex;
+    height: 100px;
+    align-items: center;
+    justify-content: space-between;
+    
+}
+
+.main-section {
+    flex-grow: 1;
+}
