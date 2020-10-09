@@ -22,16 +22,8 @@ async function generateToken() {
 
   if (accessToken) {
     jobsData = await fetchApi(accessToken);
-    sortJobs(jobsData);
-    // activeNotice.innerHTML = jobsData["0"].end_date;
-    // let currentDate = new Date();
-    // let jobEnd = new Date(jobsData["0"].end_date);
-    // console.log(jobEnd);
-    // console.log(jobsData.length);
-    // if (currentDate > jobEnd) {
-    //   console.log("job complete");
-    // }
-    // // mainSection.appendChild(activeNotice);
+    await sortJobs(jobsData);
+    await fetchCorpMembers(accessToken);
   }
 }
 
@@ -76,6 +68,7 @@ async function sortJobs(jobsData) {
     currentJob.innerHTML = date + " " + installer;
     mainSection.appendChild(currentJob);
   }
+ 
 }
 
 async function fetchChar(installer) {
@@ -88,5 +81,43 @@ async function fetchChar(installer) {
     },
   });
   const data = await dataFetch.json();
+  // console.log(data)
   return data.name;
 }
+
+
+
+
+async function fetchCorpMembers(accessToken){
+  const url = "https://esi.evetech.net/latest/corporations/98239242/members/?datasource=tranquility"
+  const dataFetch = await fetch(url, {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const data = await dataFetch.json();
+  return sortCorp(data)
+}
+
+async function sortCorp (corpData){
+        let length = corpData.length
+        let corpMembers = []
+        for (i = 0; i < length; i++) {
+          corpMembers.push(corpData[i])
+        }
+        
+        return corpMembers
+}
+
+
+  // activeNotice.innerHTML = jobsData["0"].end_date;
+    // let currentDate = new Date();
+    // let jobEnd = new Date(jobsData["0"].end_date);
+    // console.log(jobEnd);
+    // console.log(jobsData.length);
+    // if (currentDate > jobEnd) {
+    //   console.log("job complete");
+    // }
+    // // mainSection.appendChild(activeNotice);
