@@ -1,7 +1,7 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
-let jobsData;
+
 
 let activeNotice = document.createElement("div");
 
@@ -21,9 +21,17 @@ async function generateToken() {
   const refreshToken = data.refresh_token;
 
   if (accessToken) {
-    jobsData = await fetchApi(accessToken);
-    await sortJobs(jobsData);
-    await fetchCorpMembers(accessToken);
+   let jobsData = await fetchJobs(accessToken);
+
+   let installerList = await sortJobs(jobsData);
+   let corpData = await fetchCorpMembers(accessToken);
+  //  console.log(jobsData)
+  //  console.log(corpData);
+  //  console.log(installerList);
+   let inactive = sortActive(corpData, installerList)
+  //  console.log(inactive)
+   printInactive(inactive);
+   
   }
 }
 
@@ -42,7 +50,7 @@ async function authApi(url, code, auth) {
   return data;
 }
 
-async function fetchApi(accessToken) {
+async function fetchJobs(accessToken) {
   const dataFetch = await fetch(
     "https://esi.evetech.net/latest/corporations/98239242/industry/jobs/?datasource=tranquility&include_completed=false&page=1",
     {
@@ -54,21 +62,27 @@ async function fetchApi(accessToken) {
     }
   );
   const data = await dataFetch.json();
-  console.log(data);
   return data;
 }
 
-async function sortJobs(jobsData) {
+ function sortJobs(jobsData) {
   let length = jobsData.length;
-
+  let installerList;
+  let i = 0;
   for (i = 0; i < length; i++) {
-    let date = new Date(jobsData[i].end_date);
-    let installer = await fetchChar(jobsData[i].installer_id);
-    let currentJob = document.createElement("div");
-    currentJob.innerHTML = date + " " + installer;
-    mainSection.appendChild(currentJob);
+     let currentDate = new Date();
+     let jobEnd = new Date(jobsData[i].end_date);
+    
+   
+     if (currentDate < jobEnd) {
+      installerList = addInstaller(jobsData[i].installer_id, installerList)
+      console.log(currentDate)
+      console.log(jobEnd)
+      console.log("Active")
+       }
+       
   }
- 
+ return installerList
 }
 
 async function fetchChar(installer) {
@@ -81,7 +95,7 @@ async function fetchChar(installer) {
     },
   });
   const data = await dataFetch.json();
-  // console.log(data)
+ 
   return data.name;
 }
 
@@ -103,13 +117,106 @@ async function fetchCorpMembers(accessToken){
 
 async function sortCorp (corpData){
         let length = corpData.length
-        let corpMembers = []
+        let corpMembers = [];
+        let i = 0;
         for (i = 0; i < length; i++) {
           corpMembers.push(corpData[i])
         }
         
         return corpMembers
 }
+
+
+ function addInstaller (installerID, installerList){
+  let i = 0;
+  let length
+  let orginalList
+  
+
+  if (Array.isArray(installerList)){
+        length = installerList.length
+        orginalList = installerList
+        
+  }
+  else {
+    installerList = [];
+    installerList.push(installerID)
+    return installerList
+  }
+
+      
+       
+
+        for (i=0; i<length; i++){
+         
+          if(installerList[i] == installerID){
+            
+            return orginalList
+            
+          }
+          else if (i == length - 1){
+            installerList.push(installerID)
+            
+            return installerList
+            
+          }
+          
+        }
+}
+
+
+
+
+
+function sortActive(corpData, installerList){
+
+if(!Array.isArray(installerList)){
+  return corpData
+}
+
+
+  
+let inactiveList = corpData;
+let installerLength = installerList.length
+let i = 0;
+let j = 0
+
+       
+       do {
+         if (inactiveList[i] == installerList[j]){
+             inactiveList.splice(i,1)
+             j++;
+             i = 0;
+             
+         }
+         else {
+             i++;
+             
+         }
+          } while (j < installerLength );
+         
+                return inactiveList;
+
+}
+
+
+async function printInactive (inactive){
+  let inactiveList = document.createElement("ul");
+  let inactiveTitle = document.createElement("h2")
+  inactiveTitle.innerHTML="Inactive";
+  mainSection.appendChild(inactiveTitle);
+  mainSection.appendChild(inactiveList);
+  let length = inactive.length
+  let i;
+
+  for(i = 0; i<length; i++){
+          let currentLi  = document.createElement("li");
+          currentLi.innerHTML = await fetchChar(inactive[i]);
+          inactiveList.appendChild(currentLi);
+  }
+}
+
+
 
 
   // activeNotice.innerHTML = jobsData["0"].end_date;
@@ -121,3 +228,7 @@ async function sortCorp (corpData){
     //   console.log("job complete");
     // }
     // // mainSection.appendChild(activeNotice);
+
+    // let currentJob = document.createElement("div");
+    // currentJob.innerHTML = date + " " + installer;
+    // mainSection.appendChild(currentJob);
