@@ -165,6 +165,8 @@ function sortActive(corpData, installerList) {
   return inactiveList;
 }
 
+// Displays the list of inactive characters
+
 async function printInactive(inactive) {
   let inactiveList = document.createElement("ul");
   let inactiveTitle = document.createElement("h2");
@@ -180,17 +182,3 @@ async function printInactive(inactive) {
     inactiveList.appendChild(currentLi);
   }
 }
-
-// activeNotice.innerHTML = jobsData["0"].end_date;
-// let currentDate = new Date();
-// let jobEnd = new Date(jobsData["0"].end_date);
-// console.log(jobEnd);
-// console.log(jobsData.length);
-// if (currentDate > jobEnd) {
-//   console.log("job complete");
-// }
-// // mainSection.appendChild(activeNotice);
-
-// let currentJob = document.createElement("div");
-// currentJob.innerHTML = date + " " + installer;
-// mainSection.appendChild(currentJob);
