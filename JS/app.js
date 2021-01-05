@@ -1,8 +1,6 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
-
-
 let activeNotice = document.createElement("div");
 
 let mainSection = document.querySelector(".main-section");
@@ -21,17 +19,14 @@ async function generateToken() {
   const refreshToken = data.refresh_token;
 
   if (accessToken) {
-   let jobsData = await fetchJobs(accessToken);
+    let jobsData = await fetchJobs(accessToken);
 
-   let installerList = await sortJobs(jobsData);
-   let corpData = await fetchCorpMembers(accessToken);
-  //  console.log(jobsData)
-  //  console.log(corpData);
-  //  console.log(installerList);
-   let inactive = sortActive(corpData, installerList)
-  //  console.log(inactive)
-   printInactive(inactive);
-   
+    let installerList = await sortJobs(jobsData);
+    let corpData = await fetchCorpMembers(accessToken);
+
+    let inactive = sortActive(corpData, installerList);
+
+    printInactive(inactive);
   }
 }
 
@@ -65,24 +60,22 @@ async function fetchJobs(accessToken) {
   return data;
 }
 
- function sortJobs(jobsData) {
+function sortJobs(jobsData) {
   let length = jobsData.length;
   let installerList;
   let i = 0;
   for (i = 0; i < length; i++) {
-     let currentDate = new Date();
-     let jobEnd = new Date(jobsData[i].end_date);
-    
-   
-     if (currentDate < jobEnd) {
-      installerList = addInstaller(jobsData[i].installer_id, installerList)
-      console.log(currentDate)
-      console.log(jobEnd)
-      console.log("Active")
-       }
-       
+    let currentDate = new Date();
+    let jobEnd = new Date(jobsData[i].end_date);
+
+    if (currentDate < jobEnd) {
+      installerList = addInstaller(jobsData[i].installer_id, installerList);
+      console.log(currentDate);
+      console.log(jobEnd);
+      console.log("Active");
+    }
   }
- return installerList
+  return installerList;
 }
 
 async function fetchChar(installer) {
@@ -95,15 +88,13 @@ async function fetchChar(installer) {
     },
   });
   const data = await dataFetch.json();
- 
+
   return data.name;
 }
 
-
-
-
-async function fetchCorpMembers(accessToken){
-  const url = "https://esi.evetech.net/latest/corporations/98239242/members/?datasource=tranquility"
+async function fetchCorpMembers(accessToken) {
+  const url =
+    "https://esi.evetech.net/latest/corporations/98239242/members/?datasource=tranquility";
   const dataFetch = await fetch(url, {
     method: "GET",
     headers: {
@@ -112,123 +103,94 @@ async function fetchCorpMembers(accessToken){
     },
   });
   const data = await dataFetch.json();
-  return sortCorp(data)
+  return sortCorp(data);
 }
 
-async function sortCorp (corpData){
-        let length = corpData.length
-        let corpMembers = [];
-        let i = 0;
-        for (i = 0; i < length; i++) {
-          corpMembers.push(corpData[i])
-        }
-        
-        return corpMembers
-}
-
-
- function addInstaller (installerID, installerList){
+async function sortCorp(corpData) {
+  let length = corpData.length;
+  let corpMembers = [];
   let i = 0;
-  let length
-  let orginalList
-  
-
-  if (Array.isArray(installerList)){
-        length = installerList.length
-        orginalList = installerList
-        
+  for (i = 0; i < length; i++) {
+    corpMembers.push(corpData[i]);
   }
-  else {
+
+  return corpMembers;
+}
+
+function addInstaller(installerID, installerList) {
+  let i = 0;
+  let length;
+  let orginalList;
+
+  if (Array.isArray(installerList)) {
+    length = installerList.length;
+    orginalList = installerList;
+  } else {
     installerList = [];
-    installerList.push(installerID)
-    return installerList
+    installerList.push(installerID);
+    return installerList;
   }
 
-      
-       
+  for (i = 0; i < length; i++) {
+    if (installerList[i] == installerID) {
+      return orginalList;
+    } else if (i == length - 1) {
+      installerList.push(installerID);
 
-        for (i=0; i<length; i++){
-         
-          if(installerList[i] == installerID){
-            
-            return orginalList
-            
-          }
-          else if (i == length - 1){
-            installerList.push(installerID)
-            
-            return installerList
-            
-          }
-          
-        }
+      return installerList;
+    }
+  }
 }
 
+function sortActive(corpData, installerList) {
+  if (!Array.isArray(installerList)) {
+    return corpData;
+  }
 
+  let inactiveList = corpData;
+  let installerLength = installerList.length;
+  let i = 0;
+  let j = 0;
 
+  do {
+    if (inactiveList[i] == installerList[j]) {
+      inactiveList.splice(i, 1);
+      j++;
+      i = 0;
+    } else {
+      i++;
+    }
+  } while (j < installerLength);
 
-
-function sortActive(corpData, installerList){
-
-if(!Array.isArray(installerList)){
-  return corpData
+  return inactiveList;
 }
 
-
-  
-let inactiveList = corpData;
-let installerLength = installerList.length
-let i = 0;
-let j = 0
-
-       
-       do {
-         if (inactiveList[i] == installerList[j]){
-             inactiveList.splice(i,1)
-             j++;
-             i = 0;
-             
-         }
-         else {
-             i++;
-             
-         }
-          } while (j < installerLength );
-         
-                return inactiveList;
-
-}
-
-
-async function printInactive (inactive){
+async function printInactive(inactive) {
   let inactiveList = document.createElement("ul");
-  let inactiveTitle = document.createElement("h2")
-  inactiveTitle.innerHTML="Inactive";
+  let inactiveTitle = document.createElement("h2");
+  inactiveTitle.innerHTML = "Inactive";
   mainSection.appendChild(inactiveTitle);
   mainSection.appendChild(inactiveList);
-  let length = inactive.length
+  let length = inactive.length;
   let i;
 
-  for(i = 0; i<length; i++){
-          let currentLi  = document.createElement("li");
-          currentLi.innerHTML = await fetchChar(inactive[i]);
-          inactiveList.appendChild(currentLi);
+  for (i = 0; i < length; i++) {
+    let currentLi = document.createElement("li");
+    currentLi.innerHTML = await fetchChar(inactive[i]);
+    inactiveList.appendChild(currentLi);
   }
 }
 
+// activeNotice.innerHTML = jobsData["0"].end_date;
+// let currentDate = new Date();
+// let jobEnd = new Date(jobsData["0"].end_date);
+// console.log(jobEnd);
+// console.log(jobsData.length);
+// if (currentDate > jobEnd) {
+//   console.log("job complete");
+// }
+// // mainSection.appendChild(activeNotice);
 
-
-
-  // activeNotice.innerHTML = jobsData["0"].end_date;
-    // let currentDate = new Date();
-    // let jobEnd = new Date(jobsData["0"].end_date);
-    // console.log(jobEnd);
-    // console.log(jobsData.length);
-    // if (currentDate > jobEnd) {
-    //   console.log("job complete");
-    // }
-    // // mainSection.appendChild(activeNotice);
-
-    // let currentJob = document.createElement("div");
-    // currentJob.innerHTML = date + " " + installer;
-    // mainSection.appendChild(currentJob);
+// let currentJob = document.createElement("div");
+// currentJob.innerHTML = date + " " + installer;
+// mainSection.appendChild(currentJob);
